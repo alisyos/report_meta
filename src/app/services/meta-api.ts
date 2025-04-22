@@ -27,7 +27,10 @@ export class MetaAdService {
   constructor(config?: MetaApiConfig) {
     // 환경 변수에서 설정 가져오기 또는 전달된 설정 사용
     this.accessToken = config?.accessToken || metaConfig.accessToken;
-    this.adAccountId = config?.adAccountId || metaConfig.adAccountId;
+    
+    // adAccountId에 'act_' 접두사가 이미 포함되어 있는지 확인
+    const accountId = config?.adAccountId || metaConfig.adAccountId;
+    this.adAccountId = accountId.startsWith('act_') ? accountId.substring(4) : accountId;
   }
 
   /**
@@ -35,6 +38,12 @@ export class MetaAdService {
    */
   async getAdAccount() {
     try {
+      console.log('API 요청 URL:', `${this.baseUrl}/act_${this.adAccountId}`);
+      console.log('API 요청 파라미터:', {
+        fields: 'name,account_status,amount_spent,balance,currency,business_name',
+        access_token: this.accessToken.substring(0, 20) + '...(생략)', // 보안을 위해 일부만 표시
+      });
+      
       const response = await axios.get(
         `${this.baseUrl}/act_${this.adAccountId}`,
         {
@@ -44,9 +53,19 @@ export class MetaAdService {
           },
         }
       );
+      console.log('API 응답 데이터:', response.data);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching ad account:', error);
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+        console.error('Error response headers:', error.response.headers);
+      } else if (error.request) {
+        console.error('Error request:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
       throw error;
     }
   }

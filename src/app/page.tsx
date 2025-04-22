@@ -2,173 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import { useMetaApi } from './context/MetaApiContext';
-import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-interface ApiCredentialsForm {
-  accessToken: string;
-  adAccountId: string;
-}
-
 export default function Home() {
-  const { isConnected, connectApi, disconnectApi, loading, error, useEnvCredentials } = useMetaApi();
-  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
-
-  const { register, handleSubmit, formState: { errors } } = useForm<ApiCredentialsForm>();
-
-  const onSubmit = async (data: ApiCredentialsForm) => {
-    try {
-      const success = await connectApi(data.accessToken, data.adAccountId);
-      if (success) {
-        setSaveSuccess('인증 정보가 서버에 저장되었습니다.');
-        setTimeout(() => setSaveSuccess(null), 3000);
-      }
-    } catch (error) {
-      console.error('메타 API 연결 오류:', error);
-    }
-  };
-
-  const handleDisconnect = async () => {
-    try {
-      const success = await disconnectApi();
-      if (success) {
-        setSaveSuccess('인증 정보가 서버에서 삭제되었습니다.');
-        setTimeout(() => setSaveSuccess(null), 3000);
-      }
-    } catch (error) {
-      console.error('연결 해제 오류:', error);
-    }
-  };
-
-  const handleUseEnvCredentials = async () => {
-    try {
-      const success = await useEnvCredentials();
-      if (success) {
-        setSaveSuccess('환경 변수의 인증 정보가 성공적으로 로드되었습니다.');
-        setTimeout(() => setSaveSuccess(null), 3000);
-      }
-    } catch (error) {
-      console.error('환경 변수 로드 오류:', error);
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">메타 광고 리포트</h1>
-          {isConnected && (
-            <button
-              onClick={handleDisconnect}
-              disabled={loading}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:bg-red-400"
-            >
-              {loading ? '처리 중...' : '연결 해제'}
-            </button>
-          )}
         </div>
       </header>
 
       <main className="flex-grow max-w-7xl w-full mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        {!isConnected ? (
-          <div className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto">
-            <h2 className="text-xl font-semibold mb-4">메타 광고 API 연결</h2>
-            <p className="text-gray-600 mb-6">
-              메타 광고 리포트를 확인하려면 메타 광고 API 접근 토큰과 광고 계정 ID를 입력하세요.
-              입력한 정보는 서버에 안전하게 저장됩니다.
-            </p>
-            
-            {error && (
-              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-                {error}
-              </div>
-            )}
-            
-            {saveSuccess && (
-              <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
-                {saveSuccess}
-              </div>
-            )}
-            
-            <button
-              onClick={handleUseEnvCredentials}
-              disabled={loading}
-              className="w-full mb-4 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-green-400"
-            >
-              {loading ? '처리 중...' : '환경 변수의 인증 정보 사용하기'}
-            </button>
-            
-            <div className="my-4 flex items-center">
-              <div className="flex-grow border-t border-gray-300"></div>
-              <span className="mx-2 text-gray-500 text-sm">또는</span>
-              <div className="flex-grow border-t border-gray-300"></div>
-            </div>
-            
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <label htmlFor="accessToken" className="block text-sm font-medium text-gray-700 mb-1">
-                  접근 토큰 (Access Token)
-                </label>
-                <input
-                  type="text"
-                  id="accessToken"
-                  {...register('accessToken', { required: '접근 토큰을 입력해주세요' })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="EAAxxxx..."
-                />
-                {errors.accessToken && (
-                  <p className="mt-1 text-sm text-red-600">{errors.accessToken.message}</p>
-                )}
-              </div>
-              
-              <div>
-                <label htmlFor="adAccountId" className="block text-sm font-medium text-gray-700 mb-1">
-                  광고 계정 ID
-                </label>
-                <input
-                  type="text"
-                  id="adAccountId"
-                  {...register('adAccountId', { required: '광고 계정 ID를 입력해주세요' })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="1234567890"
-                />
-                {errors.adAccountId && (
-                  <p className="mt-1 text-sm text-red-600">{errors.adAccountId.message}</p>
-                )}
-              </div>
-              
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400"
-              >
-                {loading ? '처리 중...' : '연결 및 저장하기'}
-              </button>
-            </form>
-            
-            <div className="mt-6 text-sm text-gray-500">
-              <p className="mb-2">
-                <strong>도움말:</strong>
-              </p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>접근 토큰은 <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">Graph API 탐색기</a>에서 생성할 수 있습니다.</li>
-                <li>권한은 <code>ads_read</code>, <code>ads_management</code> 권한이 필요합니다.</li>
-                <li>광고 계정 ID는 <code>act_</code> 접두사 없이 숫자만 입력하세요.</li>
-                <li>입력하신 정보는 서버의 <code>credentials.json</code> 파일에 저장됩니다.</li>
-              </ul>
-            </div>
-          </div>
-        ) : (
-          <div>
-            {saveSuccess && (
-              <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
-                {saveSuccess}
-              </div>
-            )}
-            <ReportDashboard />
-          </div>
-        )}
+        <ReportDashboard />
       </main>
     </div>
   );
@@ -189,13 +36,22 @@ function ReportDashboard() {
   });
 
   const loadAccountData = async () => {
-    if (!apiService) return;
+    if (!apiService) {
+      console.log('API 서비스가 없습니다. apiService:', apiService);
+      return;
+    }
+    
+    console.log('계정 데이터 로드 시작, 토큰:', apiService['accessToken'], '계정ID:', apiService['adAccountId']);
+    console.log('API 서비스 메소드 확인:', Object.getOwnPropertyNames(Object.getPrototypeOf(apiService)));
     
     setIsLoading(true);
     try {
+      console.log('getAdAccount 호출 전');
       const account = await apiService.getAdAccount();
+      console.log('계정 데이터 로드 성공:', account);
       setAccountData(account);
       
+      console.log('getInsights 호출 전, dateRange:', dateRange);
       const insights = await apiService.getInsights({
         dateRange: dateRange,
         fields: [
@@ -210,9 +66,14 @@ function ReportDashboard() {
           'cost_per_action_type'
         ]
       });
+      console.log('인사이트 데이터 로드 성공:', insights);
       setInsightsData(insights);
-    } catch (error) {
+    } catch (error: any) {
       console.error('데이터 로딩 오류:', error);
+      if (error.response) {
+        console.error('오류 응답:', error.response.data);
+        console.error('오류 상태:', error.response.status);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -220,17 +81,30 @@ function ReportDashboard() {
 
   // 네비게이션을 위한 캠페인 및 광고세트 데이터 로드
   const loadNavigationData = async () => {
-    if (!apiService) return;
+    if (!apiService) {
+      console.log('네비게이션 데이터 로드: API 서비스가 없습니다.');
+      return;
+    }
     
+    console.log('네비게이션 데이터 로드 시작');
     setLoadingNavigation(true);
     try {
       // 캠페인 목록 로드
+      console.log('getCampaigns 호출 전');
       const campaignsResponse = await apiService.getCampaigns();
+      console.log('캠페인 응답:', campaignsResponse);
       if (campaignsResponse && campaignsResponse.data) {
+        console.log('캠페인 데이터 설정:', campaignsResponse.data);
         setCampaigns(campaignsResponse.data);
+      } else {
+        console.log('캠페인 데이터 없음');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('네비게이션 데이터 로드 오류:', error);
+      if (error.response) {
+        console.error('오류 응답:', error.response.data);
+        console.error('오류 상태:', error.response.status);
+      }
     } finally {
       setLoadingNavigation(false);
     }
@@ -255,9 +129,15 @@ function ReportDashboard() {
 
   // 페이지 로드 시 데이터 로딩
   useEffect(() => {
+    console.log('apiService 변경됨:', apiService);
     if (apiService) {
-      loadAccountData();
-      loadNavigationData();
+      console.log('API 서비스 사용 가능, 데이터 로드 시작');
+      setTimeout(() => {
+        loadAccountData();
+        loadNavigationData();
+      }, 1000); // 지연 후 로드 시도
+    } else {
+      console.log('API 서비스 사용 불가능');
     }
   }, [apiService]);
 
