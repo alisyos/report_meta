@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useMetaApi } from '../context/MetaApiContext';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 
-export default function AdSetsPage() {
+// SearchParams를 사용하는 컴포넌트를 분리
+function AdSetsContent() {
   const router = useRouter();
   const { apiService, isConnected } = useMetaApi();
   const [adSets, setAdSets] = useState<any[]>([]);
@@ -250,10 +251,36 @@ export default function AdSetsPage() {
               </div>
             </div>
           ) : (
-            <p className="text-gray-500 py-8 text-center">해당 캠페인의 광고 세트가 없습니다.</p>
+            <div className="text-center py-8">
+              <p className="text-gray-500">광고 세트가 없거나 로드할 수 없습니다.</p>
+              <button 
+                onClick={loadAdSets}
+                className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              >
+                다시 시도
+              </button>
+            </div>
           )}
         </div>
       </main>
     </div>
+  );
+}
+
+// 로딩 중 UI
+function AdSetsLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600"></div>
+    </div>
+  );
+}
+
+// 메인 페이지 컴포넌트
+export default function AdSetsPage() {
+  return (
+    <Suspense fallback={<AdSetsLoading />}>
+      <AdSetsContent />
+    </Suspense>
   );
 } 

@@ -3,7 +3,7 @@ services:
     name: report-meta
     env: node
     branch: master
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --production=false && npm run build
     startCommand: npm run start
     envVars:
       - key: NODE_ENV
