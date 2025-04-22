@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useMetaApi } from './context/MetaApiContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-export default function Home() {
+// 메인 페이지 컨텐츠 컴포넌트
+function HomeContent() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <header className="bg-white shadow-sm">
@@ -18,6 +19,24 @@ export default function Home() {
         <ReportDashboard />
       </main>
     </div>
+  );
+}
+
+// 로딩 중 UI
+function HomeLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600"></div>
+    </div>
+  );
+}
+
+// 메인 페이지 컴포넌트
+export default function Home() {
+  return (
+    <Suspense fallback={<HomeLoading />}>
+      <HomeContent />
+    </Suspense>
   );
 }
 
