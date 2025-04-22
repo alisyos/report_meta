@@ -83,3 +83,28 @@
 - 입력한 접근 토큰과 광고 계정 ID는 서버의 `credentials.json` 파일에 저장됩니다.
 - 접근 토큰의 만료 기간은 기본적으로 단기간(일반적으로 1~2시간)입니다. 장기 토큰을 얻으려면 사용자 토큰을 페이지 접근 토큰으로 교환해야 합니다.
 - 보안을 위해 프로덕션 환경에서는 환경 변수나 보안 서비스를 통해 자격 증명을 관리하는 것이 좋습니다.
+
+## Render.com 배포 방법
+
+이 프로젝트는 Render.com을 통해 배포할 수 있습니다:
+
+1. Render.com 계정에 로그인합니다.
+2. Dashboard에서 "New +" 버튼을 클릭하고 "Web Service"를 선택합니다.
+3. GitHub 저장소 연결: https://github.com/alisyos/report_meta
+4. 다음 설정으로 웹 서비스를 구성합니다:
+   - Name: report-meta (또는 원하는 이름)
+   - Environment: Node
+   - Build Command: `npm install && npm run build`
+   - Start Command: `npm run start`
+   - Instance Type: Free 또는 필요에 맞는 유료 플랜
+5. "Environment Variables" 섹션에서 다음 환경 변수를 추가합니다:
+   ```
+   NODE_ENV=production
+   meta.app.id=YOUR_META_APP_ID
+   meta.app.secret=YOUR_META_APP_SECRET
+   meta.access.token=YOUR_META_ACCESS_TOKEN
+   meta.ad.account.id=YOUR_META_AD_ACCOUNT_ID
+   ```
+6. "Create Web Service" 버튼을 클릭하여 배포를 시작합니다.
+
+배포가 완료되면 제공된 URL에서 웹사이트에 접근할 수 있습니다.
