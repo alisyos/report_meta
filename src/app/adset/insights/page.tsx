@@ -1,12 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useMetaApi } from '../../context/MetaApiContext';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 
-export default function AdSetInsightsPage() {
+// 로딩 중 UI
+function AdSetInsightsLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600"></div>
+    </div>
+  );
+}
+
+// SearchParams를 사용하는 컴포넌트를 분리
+function AdSetInsightsContent() {
   const router = useRouter();
   const { apiService, isConnected } = useMetaApi();
   const [insightsData, setInsightsData] = useState<any>(null);
@@ -403,5 +413,14 @@ export default function AdSetInsightsPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+// 메인 페이지 컴포넌트
+export default function AdSetInsightsPage() {
+  return (
+    <Suspense fallback={<AdSetInsightsLoading />}>
+      <AdSetInsightsContent />
+    </Suspense>
   );
 } 
